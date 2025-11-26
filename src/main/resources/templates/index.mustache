@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SSE Chat</title>
+</head>
+
+<body>
+
+<h1>SSE 실시간 채팅</h1>
+<hr>
+
+<div>
+    <input id="message" placeholder="메시지 입력">
+    <button onclick="sendMessage()">전송</button>
+</div>
+
+<ul id="chat-box" style="margin-top: 20px;"></ul>
+
+<script>
+    // 🔥 1. SSE 스트림 연결 (스크립트가 body 끝에 있어 DOMContentLoaded 없이 바로 실행)
+    const sse = new EventSource("/chats/connect");
+
+    // 최초 연결시 더미(connect) 이벤트
+    sse.addEventListener("connect", (e) => {
+        console.log("connected:", e.data); // "connected"
+    });
+
+    // 서버가 push 하는 chat 이벤트 수신
+    sse.addEventListener("chat", (e) => {
+        console.log("chat event:", e.data);
+        const chat = JSON.parse(e.data);
+        appendChat(chat.message);
+    });
+
+    // 🔥 2. 메시지 전송
+    async function sendMessage() {
+        const messageInput = document.getElementById("message");
+        const message = messageInput.value.trim();
+
+        await fetch("/chats", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+        });
+
+        messageInput.value = "";
+        messageInput.focus();
+    }
+
+    // 🔥 3. 화면 채팅 DOM 업데이트
+    function appendChat(message) {
+        const box = document.getElementById("chat-box");
+        const li = document.createElement("li");
+        li.innerText = message;
+        box.prepend(li);
+    }
+</script>
+
+</body>
+</html>
