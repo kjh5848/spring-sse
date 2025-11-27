@@ -64,7 +64,6 @@ public class SseEmitters {
         emitters.put(clientId, emitter);
         log.info("new emitter clientId: {}", clientId);
         log.info("new emitter added: {}", emitter);
-        log.info("emitter list size: {}", emitters.size());
 
         /*
          * 3. emitter 생명주기 콜백 등록
